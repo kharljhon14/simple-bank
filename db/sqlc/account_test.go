@@ -126,7 +126,7 @@ func TestListAccounts(t *testing.T) {
 	}
 
 	args = ListAccountsParams{
-		Limit:  99,
+		Limit:  10,
 		Offset: 0,
 	}
 	accounts, _ = testQueires.ListAccounts(context.Background(), args)

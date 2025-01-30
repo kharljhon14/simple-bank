@@ -73,7 +73,7 @@ func TestListEntries(t *testing.T) {
 	}
 
 	args = ListEntriesParams{
-		Limit:  99,
+		Limit:  10,
 		Offset: 0,
 	}
 
