@@ -18,7 +18,7 @@ func createTestEntry(t *testing.T) Entry {
 		Amount:    util.RandomMoneyAmount(),
 	}
 
-	entry, err := testQueires.CreateEntry(context.Background(), args)
+	entry, err := testStore.CreateEntry(context.Background(), args)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry)
 
@@ -30,7 +30,7 @@ func createTestEntry(t *testing.T) Entry {
 }
 
 func deleteTestEntry(t *testing.T, id int64) {
-	err := testQueires.DeleteEntry(context.Background(), id)
+	err := testStore.DeleteEntry(context.Background(), id)
 	require.NoError(t, err)
 }
 
@@ -43,7 +43,7 @@ func TestCreateEntry(t *testing.T) {
 func TestGetEntry(t *testing.T) {
 	entry := createTestEntry(t)
 
-	entry2, err := testQueires.GetEntry(context.Background(), entry.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -64,7 +64,7 @@ func TestListEntries(t *testing.T) {
 		Offset: 5,
 	}
 
-	entries, err := testQueires.ListEntries(context.Background(), args)
+	entries, err := testStore.ListEntries(context.Background(), args)
 	require.NoError(t, err)
 	require.Len(t, entries, 5)
 
@@ -77,7 +77,7 @@ func TestListEntries(t *testing.T) {
 		Offset: 0,
 	}
 
-	entries, _ = testQueires.ListEntries(context.Background(), args)
+	entries, _ = testStore.ListEntries(context.Background(), args)
 	for _, entry := range entries {
 		deleteTestEntry(t, entry.ID)
 	}
@@ -88,7 +88,7 @@ func TestDeleteEntry(t *testing.T) {
 
 	deleteTestEntry(t, entry.ID)
 
-	entry2, err := testQueires.GetEntry(context.Background(), entry.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry.ID)
 	require.Error(t, err)
 	errorMessage := fmt.Errorf("sql: %s", err)
 	require.EqualError(t, errorMessage, sql.ErrNoRows.Error())

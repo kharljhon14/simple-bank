@@ -20,7 +20,7 @@ func createTestTransaction(t *testing.T) Transfer {
 		Amount:        util.RandomMoneyAmount(),
 	}
 
-	transfer, err := testQueires.CreateTransaction(context.Background(), args)
+	transfer, err := testStore.CreateTransaction(context.Background(), args)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer)
 
@@ -32,7 +32,7 @@ func createTestTransaction(t *testing.T) Transfer {
 }
 
 func deleteTestTransaction(t *testing.T, id int64) {
-	err := testQueires.DeleteTransaction(context.Background(), id)
+	err := testStore.DeleteTransaction(context.Background(), id)
 	require.NoError(t, err)
 }
 
@@ -44,7 +44,7 @@ func TestCreateTransaction(t *testing.T) {
 func TestGetTransaction(t *testing.T) {
 	transfer := createTestTransaction(t)
 
-	transfer2, err := testQueires.GetTransaction(context.Background(), transfer.ID)
+	transfer2, err := testStore.GetTransaction(context.Background(), transfer.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer2)
 
@@ -65,7 +65,7 @@ func TestListTransactions(t *testing.T) {
 		Offset: 5,
 	}
 
-	transactions, err := testQueires.ListTransactions(context.Background(), args)
+	transactions, err := testStore.ListTransactions(context.Background(), args)
 	require.NoError(t, err)
 	require.Len(t, transactions, 5)
 
@@ -78,7 +78,7 @@ func TestListTransactions(t *testing.T) {
 		Offset: 0,
 	}
 
-	transactions, _ = testQueires.ListTransactions(context.Background(), args)
+	transactions, _ = testStore.ListTransactions(context.Background(), args)
 	for _, transaction := range transactions {
 		deleteTestTransaction(t, transaction.ID)
 	}
@@ -89,7 +89,7 @@ func TestDeleteTransaction(t *testing.T) {
 
 	deleteTestTransaction(t, transaction.ID)
 
-	transaction2, err := testQueires.GetTransaction(context.Background(), transaction.ID)
+	transaction2, err := testStore.GetTransaction(context.Background(), transaction.ID)
 	require.Error(t, err)
 	errorMessage := fmt.Errorf("sql: %s", err)
 	require.EqualError(t, errorMessage, sql.ErrNoRows.Error())

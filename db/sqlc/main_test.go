@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -14,16 +14,17 @@ const (
 	dbSource = "postgresql://root:postgres@localhost:5432/simple_bank?sslmode=disable"
 )
 
-var testQueires *Queries
+var testStore Store
 
 func TestMain(m *testing.M) {
-	conn, err := pgx.Connect(context.Background(), dbSource)
+	var err error
+
+	testDBPool, err := pgxpool.New(context.Background(), dbSource)
 	if err != nil {
 		log.Fatal("cannot connect to DB", err)
 	}
-	defer conn.Close(context.Background())
 
-	testQueires = New(conn)
+	testStore = *NewStore(testDBPool)
 
 	// Run unit tests
 	os.Exit(m.Run())

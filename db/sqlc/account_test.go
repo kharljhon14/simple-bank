@@ -18,7 +18,7 @@ func createRandomAccount(t *testing.T) Account {
 		Currency: util.RandomCurrency(),
 	}
 
-	account, err := testQueires.CreateAccount(context.Background(), args)
+	account, err := testStore.CreateAccount(context.Background(), args)
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
 
@@ -33,7 +33,7 @@ func createRandomAccount(t *testing.T) Account {
 }
 
 func deleteTestAccount(t *testing.T, id int64) {
-	err := testQueires.DeleteAccount(context.Background(), id)
+	err := testStore.DeleteAccount(context.Background(), id)
 	require.NoError(t, err)
 }
 
@@ -48,7 +48,7 @@ func TestGetAccount(t *testing.T) {
 	account := createRandomAccount(t)
 
 	// Get account
-	account2, err := testQueires.GetAccount(context.Background(), account.ID)
+	account2, err := testStore.GetAccount(context.Background(), account.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 
@@ -75,7 +75,7 @@ func TestUpdateAccount(t *testing.T) {
 		Balance: util.RandomMoneyAmount(),
 	}
 
-	account2, err := testQueires.UpdateAccount(context.Background(), args)
+	account2, err := testStore.UpdateAccount(context.Background(), args)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 
@@ -99,7 +99,7 @@ func TestDeleteAccount(t *testing.T) {
 	account := createRandomAccount(t)
 	deleteTestAccount(t, account.ID)
 
-	account2, err := testQueires.GetAccount(context.Background(), account.ID)
+	account2, err := testStore.GetAccount(context.Background(), account.ID)
 	require.Error(t, err)
 	errorMessage := fmt.Errorf("sql: %s", err)
 	require.EqualError(t, errorMessage, sql.ErrNoRows.Error())
@@ -117,7 +117,7 @@ func TestListAccounts(t *testing.T) {
 		Offset: 5,
 	}
 
-	accounts, err := testQueires.ListAccounts(context.Background(), args)
+	accounts, err := testStore.ListAccounts(context.Background(), args)
 	require.NoError(t, err)
 	require.Len(t, accounts, 5)
 
@@ -129,7 +129,7 @@ func TestListAccounts(t *testing.T) {
 		Limit:  10,
 		Offset: 0,
 	}
-	accounts, _ = testQueires.ListAccounts(context.Background(), args)
+	accounts, _ = testStore.ListAccounts(context.Background(), args)
 	for _, account := range accounts {
 		deleteTestAccount(t, account.ID)
 	}
