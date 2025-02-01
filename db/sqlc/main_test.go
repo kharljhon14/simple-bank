@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot connect to DB", err)
 	}
 
-	testStore = *NewStore(testDBPool)
+	testStore = NewStore(testDBPool)
 
 	// Run unit tests
 	os.Exit(m.Run())
