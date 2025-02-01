@@ -29,13 +29,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Migrate up
-      - uses: make migrateup
+      - name: Run Migration
+        uses: make migrateup
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.20'
+          go-version: '1.23'
         id: go
 
       - name: Test
