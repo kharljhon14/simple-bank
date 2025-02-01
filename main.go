@@ -3,19 +3,15 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kharljhon14/simple-bank/cmd/api"
 	db "github.com/kharljhon14/simple-bank/db/sqlc"
 )
 
-const (
-	dbSource      = "postgresql://root:postgres@localhost:5432/simple_bank?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
-)
-
 func main() {
-	connPool, err := pgxpool.New(context.Background(), dbSource)
+	connPool, err := pgxpool.New(context.Background(), os.Getenv("DSN"))
 	if err != nil {
 		log.Fatal("cannot connect to db: ", err)
 	}
@@ -23,7 +19,7 @@ func main() {
 	store := db.NewStore(connPool)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(os.Getenv("ADDRESS"))
 	if err != nil {
 		log.Fatal("cannot start server: ", err)
 	}
