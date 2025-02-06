@@ -3,10 +3,12 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgconn"
 	db "github.com/kharljhon14/simple-bank/db/sqlc"
 )
 
@@ -30,6 +32,20 @@ func (s *Server) createAccountHandler(ctx *gin.Context) {
 
 	account, err := s.store.CreateAccount(ctx, arg)
 	if err != nil {
+
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			switch pgErr.ConstraintName {
+			case "owner_currency_key":
+				ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("account with %s already exists", arg.Currency)))
+			case "accounts_owner_fkey":
+				ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("user (%s) does not exists", arg.Owner)))
+				return
+			}
+
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
