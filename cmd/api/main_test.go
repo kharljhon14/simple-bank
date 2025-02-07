@@ -5,7 +5,16 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	db "github.com/kharljhon14/simple-bank/db/sqlc"
+	"github.com/stretchr/testify/require"
 )
+
+func newTestingServer(t *testing.T, store db.Store) *Server {
+	server, err := NewServer(store)
+	require.NoError(t, err)
+
+	return server
+}
 
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)

@@ -1,41 +1,59 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "github.com/kharljhon14/simple-bank/db/sqlc"
+	"github.com/kharljhon14/simple-bank/token"
 )
 
 // Server serves http requests
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	store      db.Store
+	router     *gin.Engine
+	tokenMaker token.Maker
 }
 
 // Creates a new http server and setup routing
-func NewServer(store db.Store) *Server {
-	server := &Server{store: store}
-	router := gin.Default()
+func NewServer(store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewJWTMaker("WOW,MuchShibe,ToDoggesadasdasdadas")
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker, %w", err)
+	}
+
+	server := &Server{
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency)
 	}
 
+	server.mountRouters()
+	return server, nil
+}
+
+func (s *Server) mountRouters() {
+	router := gin.Default()
+
 	// Add routes to router
-	router.GET("/api/v1/health", server.healthCheckHandler)
+	router.GET("/api/v1/health", s.healthCheckHandler)
 
-	router.GET("/api/v1/accounts/", server.getAccountListHandler)
-	router.GET("/api/v1/accounts/:id", server.getAccountHandler)
-	router.POST("/api/v1/accounts", server.createAccountHandler)
+	router.GET("/api/v1/accounts/", s.getAccountListHandler)
+	router.GET("/api/v1/accounts/:id", s.getAccountHandler)
+	router.POST("/api/v1/accounts", s.createAccountHandler)
 
-	router.POST("/api/v1/transfer", server.transferHandler)
+	router.POST("/api/v1/transfer", s.transferHandler)
 
-	router.POST("/api/v1/users", server.createUserHandler)
+	router.POST("/api/v1/users", s.createUserHandler)
+	router.POST("/api/v1/login", s.loginUserHandler)
 
-	server.router = router
+	s.router = router
 
-	return server
 }
 
 // Start runs the HTTP server on a specific address

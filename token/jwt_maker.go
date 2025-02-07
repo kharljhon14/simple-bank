@@ -20,8 +20,15 @@ func (j *JWTMaker) CreateToken(username string, duration time.Duration) (string,
 		return "", err
 	}
 
-	jwt := jwt.NewWithClaims(jwt.SigningMethodES256, payload)
-	return jwt.SignedString([]byte(j.secretKey))
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+
+	token, err := jwt.SignedString([]byte(j.secretKey))
+	if err != nil {
+		fmt.Println(err)
+
+		return "", err
+	}
+	return token, nil
 }
 
 func (j *JWTMaker) VerifyToken(token string) (*Payload, error) {
@@ -50,10 +57,10 @@ func (j *JWTMaker) VerifyToken(token string) (*Payload, error) {
 	return payload, nil
 }
 
-func NewJWTMAker(secretKey string) (Maker, error) {
+func NewJWTMaker(secretKey string) (Maker, error) {
 	if len(secretKey) < minSecretKeySize {
 		return nil, fmt.Errorf("must be atleast 32 characters")
 	}
 
-	return &JWTMaker{secretKey}, nil
+	return &JWTMaker{secretKey: secretKey}, nil
 }
