@@ -43,14 +43,15 @@ func (s *Server) mountRouters() {
 	// Add routes to router
 	router.GET("/api/v1/health", s.healthCheckHandler)
 
-	router.GET("/api/v1/accounts/", s.getAccountListHandler)
-	router.GET("/api/v1/accounts/:id", s.getAccountHandler)
-	router.POST("/api/v1/accounts", s.createAccountHandler)
-
-	router.POST("/api/v1/transfer", s.transferHandler)
-
 	router.POST("/api/v1/users", s.createUserHandler)
 	router.POST("/api/v1/login", s.loginUserHandler)
+
+	autRoutes := router.Group("/").Use(authMiddleware(s.tokenMaker))
+
+	autRoutes.GET("/api/v1/accounts/", s.getAccountListHandler)
+	autRoutes.GET("/api/v1/accounts/:id", s.getAccountHandler)
+	autRoutes.POST("/api/v1/accounts", s.createAccountHandler)
+	autRoutes.POST("/api/v1/transfer", s.transferHandler)
 
 	s.router = router
 

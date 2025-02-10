@@ -10,6 +10,7 @@ import (
 	_ "github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgconn"
 	db "github.com/kharljhon14/simple-bank/db/sqlc"
+	"github.com/kharljhon14/simple-bank/token"
 )
 
 type createAccountRequest struct {
@@ -24,8 +25,10 @@ func (s *Server) createAccountHandler(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
@@ -75,6 +78,13 @@ func (s *Server) getAccountHandler(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("account doesn't belong to the autheticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -89,8 +99,10 @@ func (s *Server) getAccountListHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
